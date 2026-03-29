@@ -20,23 +20,21 @@ client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
   if (message.channel.id !== CHANNEL_ID) return;
 
-  let replyText = "";
+  // kalau ketik /r replyText
   if (message.content.startsWith("/r ")) {
-    replyText = message.content.slice(3).trim();
-  } else if (message.reference) {
-    replyText = message.content.trim();
-  }
+    const replyText = message.content.slice(3).trim();
+    if (!replyText) return;
 
-  if (!replyText) return;
+    console.log("Sending admin reply to Railway:", replyText);
 
-  console.log("Sending admin reply to server:", replyText);
-
-  try {
-    await axios.post(`${SERVER_URL}/admin-reply`, { message: replyText });
-    message.reply("Sent 😏");
-  } catch (err) {
-    console.error("Failed to send to server:", err.response?.data || err.message);
-    message.reply("Error 😭");
+    try {
+      await axios.post(`${SERVER_URL}/admin-reply`, { message: replyText });
+      console.log("POST success");
+      message.reply("Sent 😏");
+    } catch (err) {
+      console.error("POST failed:", err.response?.data || err.message);
+      message.reply("Error 😭");
+    }
   }
 });
 

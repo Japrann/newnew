@@ -223,10 +223,11 @@ app.post("/admin-reply", async (req, res) => {
   const text = String(body.message || body.text || "").trim();
   if (!text) return res.status(400).json({ error: "Missing message" });
 
+  // push ke messages array biar web bisa poll
   const entry = { text, sender: "bot" };
   messages.push(entry);
 
-  // Optional: kirim ke Discord juga
+  // optional: kirim ke Discord webhook kalau lo mau
   if (DISCORD_WEBHOOK_URL) {
     try {
       await sendToDiscord(`[ADMIN REPLY]\n${text}`);
@@ -235,6 +236,7 @@ app.post("/admin-reply", async (req, res) => {
     }
   }
 
+  console.log("[ADMIN REPLY] received:", text);
   res.json({ ok: true, message: entry });
 });
 /** Toggle auto-reply mode */
