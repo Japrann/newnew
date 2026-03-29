@@ -1,5 +1,10 @@
 const { Client, GatewayIntentBits } = require("discord.js");
 const axios = require("axios");
+require("dotenv").config();
+
+const TOKEN = process.env.DISCORD_BOT_TOKEN;
+const CHANNEL_ID = process.env.CHANNEL_ID;
+const SERVER_URL = process.env.SERVER_URL; // public URL Railway
 
 const client = new Client({
   intents: [
@@ -9,36 +14,29 @@ const client = new Client({
   ]
 });
 
-require("dotenv").config();
-
-const TOKEN = process.env.DISCORD_BOT_TOKEN;
-const CHANNEL_ID = process.env.CHANNEL_ID;
-
-client.on("ready", () => {
-  console.log("bot ready 😏");
-});
+client.on("ready", () => console.log("Bot ready 😏"));
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
-
-  // pastiin cuma dari channel lu
   if (message.channel.id !== CHANNEL_ID) return;
 
+  let replyText = "";
   if (message.content.startsWith("/r ")) {
-    const reply = message.content.slice(3);
+    replyText = message.content.slice(3).trim();
+  } else if (message.reference) {
+    replyText = message.content.trim();
+  }
 
-    console.log("manual reply:", reply);
+  if (!replyText) return;
 
-    try {
-      await axios.post("https://newnew-production-a26f.up.railway.app/admin-reply", {
-        message: reply
-      });
+  console.log("Sending admin reply to server:", replyText);
 
-      message.reply("sent 😏");
-    } catch (err) {
-      console.log(err);
-      message.reply("error 😭");
-    }
+  try {
+    await axios.post(`${SERVER_URL}/admin-reply`, { message: replyText });
+    message.reply("Sent 😏");
+  } catch (err) {
+    console.error("Failed to send to server:", err.response?.data || err.message);
+    message.reply("Error 😭");
   }
 });
 

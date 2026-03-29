@@ -218,22 +218,25 @@ app.post("/message", async (req, res) => {
  * Manual bot reply (e.g. from Discord workflow or Postman).
  * Body: { "message": "text here" } — also accepts legacy { "text": "..." }.
  */
-app.post("/admin-reply", (req, res) => {
+app.post("/admin-reply", async (req, res) => {
   const body = req.body || {};
-  const raw =
-    body.message != null ? body.message : body.text != null ? body.text : "";
-  const text = String(raw).trim();
-  if (!text) {
-    return res.status(400).json({ error: 'Missing or empty "message"' });
-  }
-
-  console.log("[Manual reply]", text.slice(0, 200));
+  const text = String(body.message || body.text || "").trim();
+  if (!text) return res.status(400).json({ error: "Missing message" });
 
   const entry = { text, sender: "bot" };
   messages.push(entry);
+
+  // Optional: kirim ke Discord juga
+  if (DISCORD_WEBHOOK_URL) {
+    try {
+      await sendToDiscord(`[ADMIN REPLY]\n${text}`);
+    } catch (err) {
+      console.error("[Discord] Failed to send admin reply:", err);
+    }
+  }
+
   res.json({ ok: true, message: entry });
 });
-
 /** Toggle auto-reply mode */
 app.post("/toggle-auto", (req, res) => {
   autoReplyEnabled = !autoReplyEnabled;
