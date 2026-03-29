@@ -244,7 +244,7 @@ app.post("/toggle-auto", (req, res) => {
 /** Local / Railway: start HTTP server. Vercel imports `app` only (no listen). */
 if (require.main === module) {
   const server = app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`Server running at https://newnew-production-a26f.up.railway.app/:${PORT}`);
     logAutoReplyMode();
     if (DISCORD_WEBHOOK_URL) {
       console.log("[Discord] Webhook configured (URL length:", DISCORD_WEBHOOK_URL.length, "chars)");
